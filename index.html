@@ -16,13 +16,11 @@
 
     <main class="container">
         
-        <!-- FILTRO MENSAL (Fixo no topo para controlar ambas as abas) -->
         <section class="filtro-mes">
             <label for="mesFiltro">Mês de Referência:</label>
             <input type="month" id="mesFiltro">
         </section>
 
-        <!-- ================= ABA 1: INÍCIO ================= -->
         <div id="abaInicio" class="tab-content active">
             
             <section class="dashboard">
@@ -84,17 +82,16 @@
 
         </div>
 
-        <!-- ================= ABA 2: AGENDA PANORAMA ================= -->
         <div id="abaAgenda" class="tab-content">
-            <section class="panorama">
-                <h2>Panorama Mensal</h2>
-                <p class="desc-panorama">Visualize todos os dias do mês.</p>
-                
-                <div id="listaPanorama">
-                    <!-- Os dias do 1 ao 31 aparecerão aqui -->
+            <section class="calendario-visual">
+                <div class="dias-semana">
+                    <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
                 </div>
                 
-                <div class="acoes-rodape" style="margin-top: 20px;">
+                <div id="gridCalendario" class="grid-calendario">
+                    </div>
+                
+                <div class="acoes-rodape" style="margin-top: 30px;">
                     <button id="btnExportar" class="btn-exportar">📥 Exportar para Excel</button>
                     <button id="btnLimpar" class="btn-limpar">🗑️ Limpar Toda a Agenda</button>
                 </div>
@@ -103,7 +100,6 @@
 
     </main>
 
-    <!-- MENU INFERIOR (TABS) -->
     <nav class="bottom-nav">
         <button class="nav-btn active" onclick="trocarAba('abaInicio', this)">
             <span class="icon">🏠</span>

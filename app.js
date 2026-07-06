@@ -7,15 +7,10 @@ let agenda = JSON.parse(localStorage.getItem('agendaServicos')) || [];
 
 // CONTROLE DE ABAS (TABS)
 window.trocarAba = function(idAba, botaoClicado) {
-    // Esconde todas as abas
     document.querySelectorAll('.tab-content').forEach(aba => aba.classList.remove('active'));
-    // Desmarca todos os botões
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    
-    // Mostra a aba correta e marca o botão
     document.getElementById(idAba).classList.add('active');
     botaoClicado.classList.add('active');
-    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -58,20 +53,17 @@ function calcularServico(tipo, inicio, termino) {
     let baseDate = "2000-01-01T";
     let horaInicio = new Date(baseDate + inicio + ":00");
     let horaTermino = new Date(baseDate + termino + ":00");
-
     if (horaTermino < horaInicio) horaTermino.setDate(horaTermino.getDate() + 1);
 
     let minDiurnos = 0, minNoturnos = 0;
     let atual = new Date(horaInicio);
-
     while (atual < horaTermino) {
         let h = atual.getHours();
         if (h >= 22 || h < 5) minNoturnos++; else minDiurnos++;
         atual.setMinutes(atual.getMinutes() + 1);
     }
 
-    const hDiurnas = minDiurnos / 60;
-    const hNoturnas = minNoturnos / 60;
+    const hDiurnas = minDiurnos / 60; const hNoturnas = minNoturnos / 60;
     const tabela = VALORES[tipo];
 
     return { 
@@ -81,56 +73,55 @@ function calcularServico(tipo, inicio, termino) {
     };
 }
 
-// NOVO: CONSTRÓI O PANORAMA DO DIA 1 AO ÚLTIMO DIA
-function renderizarPanorama(mesSelecionado) {
-    const listaPanorama = document.getElementById('listaPanorama');
-    listaPanorama.innerHTML = '';
+// ==========================================
+// DESENHAR O CALENDÁRIO MENSAL EM GRADE
+// ==========================================
+function renderizarCalendarioMensal(mesSelecionado) {
+    const grid = document.getElementById('gridCalendario');
+    grid.innerHTML = '';
     
     if(!mesSelecionado) return;
     
     const [ano, mes] = mesSelecionado.split('-');
-    const diasNoMes = new Date(ano, mes, 0).getDate();
-    const diasDaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    
+    // Descobre o primeiro dia do mês e quantos dias tem no mês
+    const primeiroDia = new Date(ano, parseInt(mes) - 1, 1);
+    const ultimoDia = new Date(ano, parseInt(mes), 0);
+    const diasNoMes = ultimoDia.getDate();
+    const diaSemanaInicio = primeiroDia.getDay(); // Retorna 0 (Dom), 1 (Seg)...
 
-    const hojeObj = new Date();
-    const hojeString = `${hojeObj.getFullYear()}-${String(hojeObj.getMonth()+1).padStart(2,'0')}-${String(hojeObj.getDate()).padStart(2,'0')}`;
+    const hoje = new Date();
+    const stringHoje = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}`;
 
+    // Preenche com blocos vazios antes do dia 1 (para o calendário alinhar certo com a semana)
+    for (let i = 0; i < diaSemanaInicio; i++) {
+        grid.innerHTML += `<div class="dia-calendario vazio"></div>`;
+    }
+
+    // Cria os quadradinhos dos dias
     for (let dia = 1; dia <= diasNoMes; dia++) {
-        // Objeto de data para descobrir se é Seg, Ter, Qua... (mês no Date() começa em 0, por isso mes-1)
-        const dataObj = new Date(ano, parseInt(mes) - 1, dia);
-        const nomeDia = diasDaSemana[dataObj.getDay()];
-        const dataString = `${ano}-${mes}-${String(dia).padStart(2, '0')}`;
-
-        // Busca se existe serviço cadastrado nesse dia exato
-        const servicosDoDia = agenda.filter(item => item.data === dataString);
+        const diaPadrao = String(dia).padStart(2, '0');
+        const dataAtual = `${ano}-${mes}-${diaPadrao}`;
         
-        let conteudoInfo = `<span class="status-livre">Livre</span>`;
-        let classeHoje = dataString === hojeString ? 'hoje' : '';
+        // Verifica que dia da semana é para pintar o domingo de vermelho
+        const diaDaSemanaAtual = new Date(ano, parseInt(mes) - 1, dia).getDay();
+        const classeDomingo = diaDaSemanaAtual === 0 ? 'dia-domingo' : '';
+        const classeHoje = dataAtual === stringHoje ? 'dia-hoje' : '';
 
-        // Se encontrou serviços, troca o "Livre" pelo bloco colorido do serviço
-        if (servicosDoDia.length > 0) {
-            conteudoInfo = servicosDoDia.map(ev => {
-                const classeCor = ev.tipo === 'VD' ? 'vd' : '';
-                return `
-                    <div class="evento-pan ${classeCor}">
-                        <strong>${ev.nomeServico || "Serviço"} (${ev.tipo})</strong>
-                        ⏰ ${ev.inicio} às ${ev.termino} <br>
-                        💰 ${formatarDinheiro(ev.calculo.totalLiquido)}
-                    </div>
-                `;
-            }).join('');
-        }
+        // Busca serviços deste dia
+        const servicosDoDia = agenda.filter(item => item.data === dataAtual);
+        let badgesHTML = '';
+        
+        servicosDoDia.forEach(ev => {
+            const classeCor = ev.tipo === 'VD' ? 'bg-vd' : 'bg-he';
+            const nomeCurto = ev.nomeServico ? ev.nomeServico : ev.tipo;
+            badgesHTML += `<div class="evento-badge ${classeCor}" title="${ev.inicio} as ${ev.termino}">${nomeCurto}</div>`;
+        });
 
-        // Adiciona a linha no HTML
-        listaPanorama.innerHTML += `
-            <div class="linha-panorama ${classeHoje}">
-                <div class="col-data">
-                    <strong>${String(dia).padStart(2,'0')}</strong>
-                    <small>${nomeDia}</small>
-                </div>
-                <div class="col-info">
-                    ${conteudoInfo}
-                </div>
+        grid.innerHTML += `
+            <div class="dia-calendario ${classeHoje} ${classeDomingo}">
+                <div class="dia-numero">${dia}</div>
+                ${badgesHTML}
             </div>
         `;
     }
@@ -140,8 +131,8 @@ function renderizarPanorama(mesSelecionado) {
 function atualizarTela() {
     const mesSelecionado = document.getElementById('mesFiltro').value;
     
-    // Atualiza a nova aba de Panorama Mensal
-    renderizarPanorama(mesSelecionado);
+    // Chama a função que desenha a nova grade
+    renderizarCalendarioMensal(mesSelecionado);
 
     const lista = document.getElementById('listaServicos');
     lista.innerHTML = '';
@@ -203,7 +194,6 @@ window.editarItem = function(index) {
     document.getElementById('btnSalvar').textContent = "Atualizar Serviço";
     document.getElementById('btnCancelarEdicao').classList.remove('hidden');
     
-    // Força ir para a aba Início
     trocarAba('abaInicio', document.querySelector('.nav-btn'));
     document.getElementById('areaFormulario').scrollIntoView({ behavior: 'smooth' });
 }
@@ -276,9 +266,11 @@ document.getElementById('btnExportar').addEventListener('click', function() {
     link.download = "Relatorio_HE_VD.csv"; link.click();
 });
 
-// INICIALIZAÇÃO E PWA
+// INICIALIZAÇÃO
 configurarMesInicial();
 atualizarTela();
+
+// MUDANÇA NO CACHE - ATUALIZA PARA v6
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
 }
