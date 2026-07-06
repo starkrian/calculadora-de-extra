@@ -15,13 +15,11 @@
     </header>
 
     <main class="container">
-        <!-- FILTRO MENSAL -->
         <section class="filtro-mes">
             <label for="mesFiltro">Mês de Referência:</label>
             <input type="month" id="mesFiltro">
         </section>
 
-        <!-- PAINEL DE RESUMO (DASHBOARD) -->
         <section class="dashboard">
             <div class="card card-realizado">
                 <h3>Já Realizado (Líquido)</h3>
@@ -35,7 +33,15 @@
             </div>
         </section>
 
-        <!-- FORMULÁRIO DE CADASTRO / EDIÇÃO -->
+        <section class="calendario-visual">
+            <h2>Visão Mensal</h2>
+            <div class="dias-semana">
+                <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+            </div>
+            <div id="gridCalendario" class="grid-calendario">
+                </div>
+        </section>
+
         <section class="formulario" id="areaFormulario">
             <h2 id="tituloFormulario">Adicionar Serviço</h2>
             <form id="serviceForm">
@@ -75,12 +81,10 @@
             </form>
         </section>
 
-        <!-- LISTA DA AGENDA -->
         <section class="agenda">
-            <h2>Agenda do Mês</h2>
+            <h2>Lista Detalhada do Mês</h2>
             <div id="listaServicos">
-                <!-- Os serviços aparecerão aqui -->
-            </div>
+                </div>
             
             <div class="acoes-rodape">
                 <button id="btnExportar" class="btn-exportar">📥 Exportar para Excel</button>

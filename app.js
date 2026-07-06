@@ -87,8 +87,72 @@ function calcularServico(tipo, inicio, termino) {
     return { horasDiurnas, horasNoturnas, totalBruto, totalLiquido };
 }
 
-// ATUALIZAR TELA
+// NOVO: RENDERIZAR O CALENDÁRIO VISUAL
+function renderizarCalendario() {
+    const grid = document.getElementById('gridCalendario');
+    grid.innerHTML = '';
+
+    const mesSelecionado = document.getElementById('mesFiltro').value; 
+    if(!mesSelecionado) return;
+
+    const [ano, mes] = mesSelecionado.split('-');
+    
+    // Descobre o primeiro e último dia do mês para montar a grade corretamente
+    const primeiroDia = new Date(ano, parseInt(mes) - 1, 1);
+    const ultimoDia = new Date(ano, parseInt(mes), 0);
+    
+    const diasNoMes = ultimoDia.getDate();
+    const diaDaSemanaInicio = primeiroDia.getDay(); // 0 (Dom) a 6 (Sáb)
+
+    // Preenche os espaços em branco antes do dia 1
+    for (let i = 0; i < diaDaSemanaInicio; i++) {
+        grid.innerHTML += `<div class="dia-calendario vazio"></div>`;
+    }
+
+    // Pega o dia de hoje para destacar no calendário (bolinha vermelha)
+    const hoje = new Date();
+    const stringHoje = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}`;
+
+    // Gera os dias do mês
+    for (let dia = 1; dia <= diasNoMes; dia++) {
+        const diaFormatado = String(dia).padStart(2, '0');
+        const dataAtual = `${ano}-${mes}-${diaFormatado}`;
+        
+        // Filtra se tem serviços marcados para este dia
+        const eventosDoDia = agenda.filter(item => item.data === dataAtual);
+        
+        let badgesHtml = '';
+        eventosDoDia.forEach(ev => {
+            const corClasse = ev.tipo === 'VD' ? 'evento-vd' : '';
+            // Pega apenas a primeira palavra do nome para caber no calendário
+            const nomeCurto = ev.nomeServico ? ev.nomeServico.split(' ')[0] : ev.tipo;
+            badgesHtml += `<div class="evento-badge ${corClasse}">${nomeCurto}</div>`;
+        });
+
+        const classeHoje = dataAtual === stringHoje ? 'dia-hoje' : '';
+
+        // Ao clicar no dia, ele chama a função para preencher o formulário
+        grid.innerHTML += `
+            <div class="dia-calendario ${classeHoje}" onclick="selecionarDataCalendario('${dataAtual}')" title="Adicionar serviço no dia ${dia}">
+                <div class="dia-numero">${dia}</div>
+                ${badgesHtml}
+            </div>
+        `;
+    }
+}
+
+// Função ao clicar num dia do calendário
+window.selecionarDataCalendario = function(dataStr) {
+    document.getElementById('data').value = dataStr;
+    document.getElementById('nomeServico').focus();
+    // Rola a tela até o formulário
+    document.getElementById('areaFormulario').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ATUALIZAR TELA (Modificado para atualizar o calendário também)
 function atualizarTela() {
+    renderizarCalendario(); // Chama a montagem do calendário
+
     const lista = document.getElementById('listaServicos');
     lista.innerHTML = '';
 
@@ -131,7 +195,7 @@ function atualizarTela() {
     });
 
     if (agendaFiltrada.length === 0) {
-        lista.innerHTML = '<p style="text-align:center;" class="texto-pequeno">Nenhum serviço agendado para este mês.</p>';
+        lista.innerHTML = '<p style="text-align:center;" class="texto-pequeno">Nenhum serviço detalhado para este mês.</p>';
     }
 
     document.getElementById('totalRealizado').textContent = formatarDinheiro(liquidoRealizado);
