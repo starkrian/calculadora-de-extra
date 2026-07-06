@@ -73,9 +73,7 @@ function calcularServico(tipo, inicio, termino) {
     };
 }
 
-// ==========================================
-// DESENHAR O CALENDÁRIO MENSAL EM GRADE
-// ==========================================
+// CALENDÁRIO MENSAL EM GRADE
 function renderizarCalendarioMensal(mesSelecionado) {
     const grid = document.getElementById('gridCalendario');
     grid.innerHTML = '';
@@ -84,31 +82,26 @@ function renderizarCalendarioMensal(mesSelecionado) {
     
     const [ano, mes] = mesSelecionado.split('-');
     
-    // Descobre o primeiro dia do mês e quantos dias tem no mês
     const primeiroDia = new Date(ano, parseInt(mes) - 1, 1);
     const ultimoDia = new Date(ano, parseInt(mes), 0);
     const diasNoMes = ultimoDia.getDate();
-    const diaSemanaInicio = primeiroDia.getDay(); // Retorna 0 (Dom), 1 (Seg)...
+    const diaSemanaInicio = primeiroDia.getDay();
 
     const hoje = new Date();
     const stringHoje = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}`;
 
-    // Preenche com blocos vazios antes do dia 1 (para o calendário alinhar certo com a semana)
     for (let i = 0; i < diaSemanaInicio; i++) {
         grid.innerHTML += `<div class="dia-calendario vazio"></div>`;
     }
 
-    // Cria os quadradinhos dos dias
     for (let dia = 1; dia <= diasNoMes; dia++) {
         const diaPadrao = String(dia).padStart(2, '0');
         const dataAtual = `${ano}-${mes}-${diaPadrao}`;
         
-        // Verifica que dia da semana é para pintar o domingo de vermelho
         const diaDaSemanaAtual = new Date(ano, parseInt(mes) - 1, dia).getDay();
         const classeDomingo = diaDaSemanaAtual === 0 ? 'dia-domingo' : '';
         const classeHoje = dataAtual === stringHoje ? 'dia-hoje' : '';
 
-        // Busca serviços deste dia
         const servicosDoDia = agenda.filter(item => item.data === dataAtual);
         let badgesHTML = '';
         
@@ -127,16 +120,20 @@ function renderizarCalendarioMensal(mesSelecionado) {
     }
 }
 
-// ATUALIZAR TELAS GERAIS
+// ATUALIZAR TELAS GERAIS E CÁLCULOS
 function atualizarTela() {
     const mesSelecionado = document.getElementById('mesFiltro').value;
-    
-    // Chama a função que desenha a nova grade
     renderizarCalendarioMensal(mesSelecionado);
 
     const lista = document.getElementById('listaServicos');
     lista.innerHTML = '';
+    
     let brutoRealizado = 0, liquidoRealizado = 0, brutoPrevisto = 0, liquidoPrevisto = 0;
+    
+    // Variáveis para somar as horas
+    let horasTotalHE = 0;
+    let horasTotalVD = 0;
+
     let hoje = new Date(); hoje.setHours(0,0,0,0);
 
     const agendaFiltrada = agenda.filter(item => item.data.startsWith(mesSelecionado));
@@ -144,10 +141,20 @@ function atualizarTela() {
 
     agendaFiltrada.forEach(item => {
         let dataItem = new Date(item.data + "T00:00:00");
+        
+        // Separa entre dinheiro já feito e previsto
         if (dataItem <= hoje) {
             brutoRealizado += item.calculo.totalBruto; liquidoRealizado += item.calculo.totalLiquido;
         } else {
             brutoPrevisto += item.calculo.totalBruto; liquidoPrevisto += item.calculo.totalLiquido;
+        }
+
+        // Soma das Horas
+        const horasDoServico = item.calculo.horasDiurnas + item.calculo.horasNoturnas;
+        if (item.tipo === 'HE') {
+            horasTotalHE += horasDoServico;
+        } else if (item.tipo === 'VD') {
+            horasTotalVD += horasDoServico;
         }
 
         const indexReal = agenda.indexOf(item);
@@ -172,10 +179,21 @@ function atualizarTela() {
         lista.innerHTML = '<p style="text-align:center;" class="texto-pequeno">Nenhum serviço adicionado ainda.</p>';
     }
 
+    // ATUALIZAÇÃO DOS CARDS DE DINHEIRO
     document.getElementById('totalRealizado').textContent = formatarDinheiro(liquidoRealizado);
     document.getElementById('brutoRealizado').textContent = formatarDinheiro(brutoRealizado);
+    
     document.getElementById('totalPrevisto').textContent = formatarDinheiro(liquidoPrevisto);
     document.getElementById('brutoPrevisto').textContent = formatarDinheiro(brutoPrevisto);
+
+    const totalGeralLiquido = liquidoRealizado + liquidoPrevisto;
+    const totalGeralBruto = brutoRealizado + brutoPrevisto;
+    document.getElementById('totalGeral').textContent = formatarDinheiro(totalGeralLiquido);
+    document.getElementById('brutoGeral').textContent = formatarDinheiro(totalGeralBruto);
+
+    // ATUALIZAÇÃO DO NOVO CARD DE HORAS
+    document.getElementById('totalHorasHE').textContent = horasTotalHE.toFixed(1) + 'h';
+    document.getElementById('totalHorasVD').textContent = horasTotalVD.toFixed(1) + 'h';
 }
 
 document.getElementById('mesFiltro').addEventListener('change', atualizarTela);
@@ -270,7 +288,7 @@ document.getElementById('btnExportar').addEventListener('click', function() {
 configurarMesInicial();
 atualizarTela();
 
-// MUDANÇA NO CACHE - ATUALIZA PARA v6
+// PWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
 }

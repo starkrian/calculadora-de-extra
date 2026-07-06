@@ -16,23 +16,49 @@
 
     <main class="container">
         
+        <!-- FILTRO MENSAL -->
         <section class="filtro-mes">
             <label for="mesFiltro">Mês de Referência:</label>
             <input type="month" id="mesFiltro">
         </section>
 
+        <!-- ================= ABA 1: INÍCIO ================= -->
         <div id="abaInicio" class="tab-content active">
             
             <section class="dashboard">
-                <div class="card card-realizado">
-                    <h3>Já Realizado (Líquido)</h3>
-                    <p id="totalRealizado">R$ 0,00</p>
-                    <small>Bruto: <span id="brutoRealizado">R$ 0,00</span></small>
+                <div class="linha-cards">
+                    <div class="card card-realizado">
+                        <h3>Já Realizado (Líquido)</h3>
+                        <p id="totalRealizado">R$ 0,00</p>
+                        <small>Bruto: <span id="brutoRealizado">R$ 0,00</span></small>
+                    </div>
+                    <div class="card card-previsto">
+                        <h3>Previsão Futura (Líquido)</h3>
+                        <p id="totalPrevisto">R$ 0,00</p>
+                        <small>Bruto: <span id="brutoPrevisto">R$ 0,00</span></small>
+                    </div>
                 </div>
-                <div class="card card-previsto">
-                    <h3>Previsão Futura (Líquido)</h3>
-                    <p id="totalPrevisto">R$ 0,00</p>
-                    <small>Bruto: <span id="brutoPrevisto">R$ 0,00</span></small>
+                
+                <!-- CAIXA DO TOTAL SOMADO EM DINHEIRO -->
+                <div class="card card-total">
+                    <h3>💰 Total Geral no Mês (Líquido)</h3>
+                    <p id="totalGeral">R$ 0,00</p>
+                    <small>Bruto Total: <span id="brutoGeral">R$ 0,00</span></small>
+                </div>
+
+                <!-- NOVO: CAIXA DE TOTAL DE HORAS -->
+                <div class="card card-horas">
+                    <h3>⏱️ Total de Horas no Mês</h3>
+                    <div class="linha-horas">
+                        <div>
+                            <small>Horas HE</small><br>
+                            <strong id="totalHorasHE">0.0h</strong>
+                        </div>
+                        <div>
+                            <small>Horas VD</small><br>
+                            <strong id="totalHorasVD">0.0h</strong>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -82,6 +108,7 @@
 
         </div>
 
+        <!-- ================= ABA 2: AGENDA (GRADE) ================= -->
         <div id="abaAgenda" class="tab-content">
             <section class="calendario-visual">
                 <div class="dias-semana">
@@ -89,7 +116,8 @@
                 </div>
                 
                 <div id="gridCalendario" class="grid-calendario">
-                    </div>
+                    <!-- Os quadrados dos dias aparecerão aqui -->
+                </div>
                 
                 <div class="acoes-rodape" style="margin-top: 30px;">
                     <button id="btnExportar" class="btn-exportar">📥 Exportar para Excel</button>
@@ -100,6 +128,7 @@
 
     </main>
 
+    <!-- MENU INFERIOR (TABS) -->
     <nav class="bottom-nav">
         <button class="nav-btn active" onclick="trocarAba('abaInicio', this)">
             <span class="icon">🏠</span>
