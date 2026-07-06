@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda HE e VD</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e40af" id="theme-color-meta">
+</head>
+<body>
+    <header>
+        <h1>Controle de HE / VD</h1>
+        <button id="btnTema" class="btn-tema">🌙 Tema Escuro</button>
+    </header>
+
+    <main class="container">
+        <!-- FILTRO MENSAL -->
+        <section class="filtro-mes">
+            <label for="mesFiltro">Mês de Referência:</label>
+            <input type="month" id="mesFiltro">
+        </section>
+
+        <!-- PAINEL DE RESUMO (DASHBOARD) -->
+        <section class="dashboard">
+            <div class="card card-realizado">
+                <h3>Já Realizado (Líquido)</h3>
+                <p id="totalRealizado">R$ 0,00</p>
+                <small>Bruto: <span id="brutoRealizado">R$ 0,00</span></small>
+            </div>
+            <div class="card card-previsto">
+                <h3>Previsão Futura (Líquido)</h3>
+                <p id="totalPrevisto">R$ 0,00</p>
+                <small>Bruto: <span id="brutoPrevisto">R$ 0,00</span></small>
+            </div>
+        </section>
+
+        <!-- FORMULÁRIO DE CADASTRO / EDIÇÃO -->
+        <section class="formulario" id="areaFormulario">
+            <h2 id="tituloFormulario">Adicionar Serviço</h2>
+            <form id="serviceForm">
+                <input type="hidden" id="editIndex" value="-1">
+
+                <div class="input-group">
+                    <label for="nomeServico">Nome/Local do Serviço:</label>
+                    <input type="text" id="nomeServico" placeholder="Ex: Cooper, Bike, Evento..." required>
+                </div>
+
+                <div class="input-group">
+                    <label for="tipo">Tipo de Serviço:</label>
+                    <select id="tipo" required>
+                        <option value="HE">Hora Extra (HE)</option>
+                        <option value="VD">Vencimento Diário (VD)</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="data">Data do Serviço:</label>
+                    <input type="date" id="data" required>
+                </div>
+                
+                <div class="linha-tempo">
+                    <div class="input-group">
+                        <label for="inicio">Início:</label>
+                        <input type="time" id="inicio" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="termino">Término:</label>
+                        <input type="time" id="termino" required>
+                    </div>
+                </div>
+
+                <button type="submit" id="btnSalvar" class="btn-salvar">Salvar na Agenda</button>
+                <button type="button" id="btnCancelarEdicao" class="btn-cancelar hidden">Cancelar Edição</button>
+            </form>
+        </section>
+
+        <!-- LISTA DA AGENDA -->
+        <section class="agenda">
+            <h2>Agenda do Mês</h2>
+            <div id="listaServicos">
+                <!-- Os serviços aparecerão aqui -->
+            </div>
+            
+            <div class="acoes-rodape">
+                <button id="btnExportar" class="btn-exportar">📥 Exportar para Excel</button>
+                <button id="btnLimpar" class="btn-limpar">🗑️ Limpar Toda a Agenda</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
