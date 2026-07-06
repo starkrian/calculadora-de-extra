@@ -1,15 +1,23 @@
 const VALORES = {
-    HE: {
-        diurno: { bruto: 33.35, liquido: 24.18 },
-        noturno: { bruto: 50.03, liquido: 36.27 }
-    },
-    VD: {
-        diurno: { bruto: 26.72, liquido: 26.72 },
-        noturno: { bruto: 32.29, liquido: 32.29 }
-    }
+    HE: { diurno: { bruto: 33.35, liquido: 24.18 }, noturno: { bruto: 50.03, liquido: 36.27 } },
+    VD: { diurno: { bruto: 26.72, liquido: 26.72 }, noturno: { bruto: 32.29, liquido: 32.29 } }
 };
 
 let agenda = JSON.parse(localStorage.getItem('agendaServicos')) || [];
+
+// CONTROLE DE ABAS (TABS)
+window.trocarAba = function(idAba, botaoClicado) {
+    // Esconde todas as abas
+    document.querySelectorAll('.tab-content').forEach(aba => aba.classList.remove('active'));
+    // Desmarca todos os botões
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    
+    // Mostra a aba correta e marca o botão
+    document.getElementById(idAba).classList.add('active');
+    botaoClicado.classList.add('active');
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 // TEMA ESCURO
 const btnTema = document.getElementById('btnTema');
@@ -26,7 +34,6 @@ function aplicarTema(tema) {
         metaThemeColor.setAttribute('content', '#1e40af');
     }
 }
-
 const temaSalvo = localStorage.getItem('tema');
 if (temaSalvo) aplicarTema(temaSalvo);
 
@@ -37,15 +44,8 @@ btnTema.addEventListener('click', () => {
     localStorage.setItem('tema', novoTema);
 });
 
-// FORMATAÇÃO E CÁLCULOS
-function formatarDinheiro(valor) {
-    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-function formatarData(dataString) {
-    const partes = dataString.split('-');
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
-}
+function formatarDinheiro(valor) { return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+function formatarData(dataString) { const p = dataString.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
 
 function configurarMesInicial() {
     const hoje = new Date();
@@ -59,121 +59,104 @@ function calcularServico(tipo, inicio, termino) {
     let horaInicio = new Date(baseDate + inicio + ":00");
     let horaTermino = new Date(baseDate + termino + ":00");
 
-    if (horaTermino < horaInicio) {
-        horaTermino.setDate(horaTermino.getDate() + 1);
-    }
+    if (horaTermino < horaInicio) horaTermino.setDate(horaTermino.getDate() + 1);
 
-    let minDiurnos = 0;
-    let minNoturnos = 0;
+    let minDiurnos = 0, minNoturnos = 0;
     let atual = new Date(horaInicio);
 
     while (atual < horaTermino) {
         let h = atual.getHours();
-        if (h >= 22 || h < 5) {
-            minNoturnos++;
-        } else {
-            minDiurnos++;
-        }
+        if (h >= 22 || h < 5) minNoturnos++; else minDiurnos++;
         atual.setMinutes(atual.getMinutes() + 1);
     }
 
-    const horasDiurnas = minDiurnos / 60;
-    const horasNoturnas = minNoturnos / 60;
+    const hDiurnas = minDiurnos / 60;
+    const hNoturnas = minNoturnos / 60;
     const tabela = VALORES[tipo];
 
-    const totalBruto = (horasDiurnas * tabela.diurno.bruto) + (horasNoturnas * tabela.noturno.bruto);
-    const totalLiquido = (horasDiurnas * tabela.diurno.liquido) + (horasNoturnas * tabela.noturno.liquido);
-
-    return { horasDiurnas, horasNoturnas, totalBruto, totalLiquido };
+    return { 
+        horasDiurnas: hDiurnas, horasNoturnas: hNoturnas, 
+        totalBruto: (hDiurnas * tabela.diurno.bruto) + (hNoturnas * tabela.noturno.bruto), 
+        totalLiquido: (hDiurnas * tabela.diurno.liquido) + (hNoturnas * tabela.noturno.liquido) 
+    };
 }
 
-// NOVO: RENDERIZAR O CALENDÁRIO VISUAL
-function renderizarCalendario() {
-    const grid = document.getElementById('gridCalendario');
-    grid.innerHTML = '';
-
-    const mesSelecionado = document.getElementById('mesFiltro').value; 
+// NOVO: CONSTRÓI O PANORAMA DO DIA 1 AO ÚLTIMO DIA
+function renderizarPanorama(mesSelecionado) {
+    const listaPanorama = document.getElementById('listaPanorama');
+    listaPanorama.innerHTML = '';
+    
     if(!mesSelecionado) return;
-
+    
     const [ano, mes] = mesSelecionado.split('-');
-    
-    // Descobre o primeiro e último dia do mês para montar a grade corretamente
-    const primeiroDia = new Date(ano, parseInt(mes) - 1, 1);
-    const ultimoDia = new Date(ano, parseInt(mes), 0);
-    
-    const diasNoMes = ultimoDia.getDate();
-    const diaDaSemanaInicio = primeiroDia.getDay(); // 0 (Dom) a 6 (Sáb)
+    const diasNoMes = new Date(ano, mes, 0).getDate();
+    const diasDaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-    // Preenche os espaços em branco antes do dia 1
-    for (let i = 0; i < diaDaSemanaInicio; i++) {
-        grid.innerHTML += `<div class="dia-calendario vazio"></div>`;
-    }
+    const hojeObj = new Date();
+    const hojeString = `${hojeObj.getFullYear()}-${String(hojeObj.getMonth()+1).padStart(2,'0')}-${String(hojeObj.getDate()).padStart(2,'0')}`;
 
-    // Pega o dia de hoje para destacar no calendário (bolinha vermelha)
-    const hoje = new Date();
-    const stringHoje = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}`;
-
-    // Gera os dias do mês
     for (let dia = 1; dia <= diasNoMes; dia++) {
-        const diaFormatado = String(dia).padStart(2, '0');
-        const dataAtual = `${ano}-${mes}-${diaFormatado}`;
-        
-        // Filtra se tem serviços marcados para este dia
-        const eventosDoDia = agenda.filter(item => item.data === dataAtual);
-        
-        let badgesHtml = '';
-        eventosDoDia.forEach(ev => {
-            const corClasse = ev.tipo === 'VD' ? 'evento-vd' : '';
-            // Pega apenas a primeira palavra do nome para caber no calendário
-            const nomeCurto = ev.nomeServico ? ev.nomeServico.split(' ')[0] : ev.tipo;
-            badgesHtml += `<div class="evento-badge ${corClasse}">${nomeCurto}</div>`;
-        });
+        // Objeto de data para descobrir se é Seg, Ter, Qua... (mês no Date() começa em 0, por isso mes-1)
+        const dataObj = new Date(ano, parseInt(mes) - 1, dia);
+        const nomeDia = diasDaSemana[dataObj.getDay()];
+        const dataString = `${ano}-${mes}-${String(dia).padStart(2, '0')}`;
 
-        const classeHoje = dataAtual === stringHoje ? 'dia-hoje' : '';
+        // Busca se existe serviço cadastrado nesse dia exato
+        const servicosDoDia = agenda.filter(item => item.data === dataString);
+        
+        let conteudoInfo = `<span class="status-livre">Livre</span>`;
+        let classeHoje = dataString === hojeString ? 'hoje' : '';
 
-        // Ao clicar no dia, ele chama a função para preencher o formulário
-        grid.innerHTML += `
-            <div class="dia-calendario ${classeHoje}" onclick="selecionarDataCalendario('${dataAtual}')" title="Adicionar serviço no dia ${dia}">
-                <div class="dia-numero">${dia}</div>
-                ${badgesHtml}
+        // Se encontrou serviços, troca o "Livre" pelo bloco colorido do serviço
+        if (servicosDoDia.length > 0) {
+            conteudoInfo = servicosDoDia.map(ev => {
+                const classeCor = ev.tipo === 'VD' ? 'vd' : '';
+                return `
+                    <div class="evento-pan ${classeCor}">
+                        <strong>${ev.nomeServico || "Serviço"} (${ev.tipo})</strong>
+                        ⏰ ${ev.inicio} às ${ev.termino} <br>
+                        💰 ${formatarDinheiro(ev.calculo.totalLiquido)}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Adiciona a linha no HTML
+        listaPanorama.innerHTML += `
+            <div class="linha-panorama ${classeHoje}">
+                <div class="col-data">
+                    <strong>${String(dia).padStart(2,'0')}</strong>
+                    <small>${nomeDia}</small>
+                </div>
+                <div class="col-info">
+                    ${conteudoInfo}
+                </div>
             </div>
         `;
     }
 }
 
-// Função ao clicar num dia do calendário
-window.selecionarDataCalendario = function(dataStr) {
-    document.getElementById('data').value = dataStr;
-    document.getElementById('nomeServico').focus();
-    // Rola a tela até o formulário
-    document.getElementById('areaFormulario').scrollIntoView({ behavior: 'smooth' });
-}
-
-// ATUALIZAR TELA (Modificado para atualizar o calendário também)
+// ATUALIZAR TELAS GERAIS
 function atualizarTela() {
-    renderizarCalendario(); // Chama a montagem do calendário
+    const mesSelecionado = document.getElementById('mesFiltro').value;
+    
+    // Atualiza a nova aba de Panorama Mensal
+    renderizarPanorama(mesSelecionado);
 
     const lista = document.getElementById('listaServicos');
     lista.innerHTML = '';
-
-    const mesSelecionado = document.getElementById('mesFiltro').value;
     let brutoRealizado = 0, liquidoRealizado = 0, brutoPrevisto = 0, liquidoPrevisto = 0;
-
-    let hoje = new Date();
-    hoje.setHours(0,0,0,0);
+    let hoje = new Date(); hoje.setHours(0,0,0,0);
 
     const agendaFiltrada = agenda.filter(item => item.data.startsWith(mesSelecionado));
     agendaFiltrada.sort((a, b) => new Date(a.data) - new Date(b.data));
 
     agendaFiltrada.forEach(item => {
         let dataItem = new Date(item.data + "T00:00:00");
-        
         if (dataItem <= hoje) {
-            brutoRealizado += item.calculo.totalBruto;
-            liquidoRealizado += item.calculo.totalLiquido;
+            brutoRealizado += item.calculo.totalBruto; liquidoRealizado += item.calculo.totalLiquido;
         } else {
-            brutoPrevisto += item.calculo.totalBruto;
-            liquidoPrevisto += item.calculo.totalLiquido;
+            brutoPrevisto += item.calculo.totalBruto; liquidoPrevisto += item.calculo.totalLiquido;
         }
 
         const indexReal = agenda.indexOf(item);
@@ -183,7 +166,7 @@ function atualizarTela() {
             <div class="servico-item">
                 <span class="data-badge">${formatarData(item.data)}</span>
                 <strong>${nomeExibicao}</strong> - ${item.tipo} (${item.inicio} às ${item.termino})<br>
-                <small class="texto-pequeno">Horas Normais: ${item.calculo.horasDiurnas.toFixed(1)}h | Horas Noturnas: ${item.calculo.horasNoturnas.toFixed(1)}h</small>
+                <small class="texto-pequeno">Normais: ${item.calculo.horasDiurnas.toFixed(1)}h | Noturnas: ${item.calculo.horasNoturnas.toFixed(1)}h</small>
                 <div class="valores">Líquido: ${formatarDinheiro(item.calculo.totalLiquido)} <br> <span class="texto-pequeno">(Bruto: ${formatarDinheiro(item.calculo.totalBruto)})</span></div>
                 
                 <div class="acoes-item">
@@ -195,7 +178,7 @@ function atualizarTela() {
     });
 
     if (agendaFiltrada.length === 0) {
-        lista.innerHTML = '<p style="text-align:center;" class="texto-pequeno">Nenhum serviço detalhado para este mês.</p>';
+        lista.innerHTML = '<p style="text-align:center;" class="texto-pequeno">Nenhum serviço adicionado ainda.</p>';
     }
 
     document.getElementById('totalRealizado').textContent = formatarDinheiro(liquidoRealizado);
@@ -209,7 +192,6 @@ document.getElementById('mesFiltro').addEventListener('change', atualizarTela);
 // AÇÕES DE FORMULÁRIO (SALVAR / EDITAR)
 window.editarItem = function(index) {
     const item = agenda[index];
-    
     document.getElementById('nomeServico').value = item.nomeServico || '';
     document.getElementById('tipo').value = item.tipo;
     document.getElementById('data').value = item.data;
@@ -220,6 +202,9 @@ window.editarItem = function(index) {
     document.getElementById('tituloFormulario').textContent = "Editar Serviço";
     document.getElementById('btnSalvar').textContent = "Atualizar Serviço";
     document.getElementById('btnCancelarEdicao').classList.remove('hidden');
+    
+    // Força ir para a aba Início
+    trocarAba('abaInicio', document.querySelector('.nav-btn'));
     document.getElementById('areaFormulario').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -233,7 +218,6 @@ document.getElementById('btnCancelarEdicao').addEventListener('click', () => {
 
 document.getElementById('serviceForm').addEventListener('submit', function(e) {
     e.preventDefault();
-
     const nomeServico = document.getElementById('nomeServico').value;
     const tipo = document.getElementById('tipo').value;
     const data = document.getElementById('data').value;
@@ -250,9 +234,7 @@ document.getElementById('serviceForm').addEventListener('submit', function(e) {
         document.getElementById('tituloFormulario').textContent = "Adicionar Serviço";
         document.getElementById('btnSalvar').textContent = "Salvar na Agenda";
         document.getElementById('btnCancelarEdicao').classList.add('hidden');
-    } else {
-        agenda.push(novoServico);
-    }
+    } else { agenda.push(novoServico); }
 
     localStorage.setItem('agendaServicos', JSON.stringify(agenda));
     document.getElementById('mesFiltro').value = data.substring(0, 7);
@@ -268,52 +250,35 @@ window.excluirItem = function(index) {
         atualizarTela();
     }
 }
-
 document.getElementById('btnLimpar').addEventListener('click', function() {
-    if(confirm("Tem certeza que deseja apagar TODO o seu histórico permanentemente?")) {
-        agenda = [];
-        localStorage.removeItem('agendaServicos');
-        atualizarTela();
+    if(confirm("Tem certeza que deseja apagar TODO o histórico?")) {
+        agenda = []; localStorage.removeItem('agendaServicos'); atualizarTela();
     }
 });
 
 // EXPORTAR EXCEL
 document.getElementById('btnExportar').addEventListener('click', function() {
     if (agenda.length === 0) return alert("A agenda está vazia.");
-
     const agendaExportar = [...agenda].sort((a, b) => new Date(a.data) - new Date(b.data));
-    
-    const cabecalho = ["Nome do Serviço", "Tipo", "Data", "Inicio", "Termino", "Horas Diurnas", "Horas Noturnas", "Valor Bruto", "Valor Liquido"];
+    const cabecalho = ["Nome", "Tipo", "Data", "Inicio", "Termino", "H. Diurnas", "H. Noturnas", "V. Bruto", "V. Liquido"];
     let csvRows = [cabecalho.join(";")];
-
     agendaExportar.forEach(item => {
         const linha = [
-            item.nomeServico || "Sem nome",
-            item.tipo, 
-            formatarData(item.data), 
-            item.inicio, 
-            item.termino,
-            item.calculo.horasDiurnas.toFixed(2).replace('.', ','),
-            item.calculo.horasNoturnas.toFixed(2).replace('.', ','),
-            item.calculo.totalBruto.toFixed(2).replace('.', ','),
-            item.calculo.totalLiquido.toFixed(2).replace('.', ',')
+            item.nomeServico || "Sem nome", item.tipo, formatarData(item.data), item.inicio, item.termino,
+            item.calculo.horasDiurnas.toFixed(2).replace('.', ','), item.calculo.horasNoturnas.toFixed(2).replace('.', ','),
+            item.calculo.totalBruto.toFixed(2).replace('.', ','), item.calculo.totalLiquido.toFixed(2).replace('.', ',')
         ];
         csvRows.push(linha.join(";"));
     });
-
     const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "Relatorio_HE_VD.csv";
-    link.click();
+    link.download = "Relatorio_HE_VD.csv"; link.click();
 });
 
 // INICIALIZAÇÃO E PWA
 configurarMesInicial();
 atualizarTela();
-
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js');
-    });
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
 }

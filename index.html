@@ -15,83 +15,105 @@
     </header>
 
     <main class="container">
+        
+        <!-- FILTRO MENSAL (Fixo no topo para controlar ambas as abas) -->
         <section class="filtro-mes">
             <label for="mesFiltro">Mês de Referência:</label>
             <input type="month" id="mesFiltro">
         </section>
 
-        <section class="dashboard">
-            <div class="card card-realizado">
-                <h3>Já Realizado (Líquido)</h3>
-                <p id="totalRealizado">R$ 0,00</p>
-                <small>Bruto: <span id="brutoRealizado">R$ 0,00</span></small>
-            </div>
-            <div class="card card-previsto">
-                <h3>Previsão Futura (Líquido)</h3>
-                <p id="totalPrevisto">R$ 0,00</p>
-                <small>Bruto: <span id="brutoPrevisto">R$ 0,00</span></small>
-            </div>
-        </section>
-
-        <section class="calendario-visual">
-            <h2>Visão Mensal</h2>
-            <div class="dias-semana">
-                <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
-            </div>
-            <div id="gridCalendario" class="grid-calendario">
-                </div>
-        </section>
-
-        <section class="formulario" id="areaFormulario">
-            <h2 id="tituloFormulario">Adicionar Serviço</h2>
-            <form id="serviceForm">
-                <input type="hidden" id="editIndex" value="-1">
-
-                <div class="input-group">
-                    <label for="nomeServico">Nome/Local do Serviço:</label>
-                    <input type="text" id="nomeServico" placeholder="Ex: Cooper, Bike, Evento..." required>
-                </div>
-
-                <div class="input-group">
-                    <label for="tipo">Tipo de Serviço:</label>
-                    <select id="tipo" required>
-                        <option value="HE">Hora Extra (HE)</option>
-                        <option value="VD">Vencimento Diário (VD)</option>
-                    </select>
-                </div>
-                
-                <div class="input-group">
-                    <label for="data">Data do Serviço:</label>
-                    <input type="date" id="data" required>
-                </div>
-                
-                <div class="linha-tempo">
-                    <div class="input-group">
-                        <label for="inicio">Início:</label>
-                        <input type="time" id="inicio" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="termino">Término:</label>
-                        <input type="time" id="termino" required>
-                    </div>
-                </div>
-
-                <button type="submit" id="btnSalvar" class="btn-salvar">Salvar na Agenda</button>
-                <button type="button" id="btnCancelarEdicao" class="btn-cancelar hidden">Cancelar Edição</button>
-            </form>
-        </section>
-
-        <section class="agenda">
-            <h2>Lista Detalhada do Mês</h2>
-            <div id="listaServicos">
-                </div>
+        <!-- ================= ABA 1: INÍCIO ================= -->
+        <div id="abaInicio" class="tab-content active">
             
-            <div class="acoes-rodape">
-                <button id="btnExportar" class="btn-exportar">📥 Exportar para Excel</button>
-                <button id="btnLimpar" class="btn-limpar">🗑️ Limpar Toda a Agenda</button>
-            </div>
-        </section>
+            <section class="dashboard">
+                <div class="card card-realizado">
+                    <h3>Já Realizado (Líquido)</h3>
+                    <p id="totalRealizado">R$ 0,00</p>
+                    <small>Bruto: <span id="brutoRealizado">R$ 0,00</span></small>
+                </div>
+                <div class="card card-previsto">
+                    <h3>Previsão Futura (Líquido)</h3>
+                    <p id="totalPrevisto">R$ 0,00</p>
+                    <small>Bruto: <span id="brutoPrevisto">R$ 0,00</span></small>
+                </div>
+            </section>
+
+            <section class="formulario" id="areaFormulario">
+                <h2 id="tituloFormulario">Adicionar Serviço</h2>
+                <form id="serviceForm">
+                    <input type="hidden" id="editIndex" value="-1">
+
+                    <div class="input-group">
+                        <label for="nomeServico">Nome/Local do Serviço:</label>
+                        <input type="text" id="nomeServico" placeholder="Ex: Cooper, Bike, Evento..." required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="tipo">Tipo de Serviço:</label>
+                        <select id="tipo" required>
+                            <option value="HE">Hora Extra (HE)</option>
+                            <option value="VD">Vencimento Diário (VD)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="data">Data do Serviço:</label>
+                        <input type="date" id="data" required>
+                    </div>
+                    
+                    <div class="linha-tempo">
+                        <div class="input-group">
+                            <label for="inicio">Início:</label>
+                            <input type="time" id="inicio" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="termino">Término:</label>
+                            <input type="time" id="termino" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnSalvar" class="btn-salvar">Salvar na Agenda</button>
+                    <button type="button" id="btnCancelarEdicao" class="btn-cancelar hidden">Cancelar Edição</button>
+                </form>
+            </section>
+
+            <section class="agenda">
+                <h2>Serviços Adicionados no Mês</h2>
+                <div id="listaServicos"></div>
+            </section>
+
+        </div>
+
+        <!-- ================= ABA 2: AGENDA PANORAMA ================= -->
+        <div id="abaAgenda" class="tab-content">
+            <section class="panorama">
+                <h2>Panorama Mensal</h2>
+                <p class="desc-panorama">Visualize todos os dias do mês.</p>
+                
+                <div id="listaPanorama">
+                    <!-- Os dias do 1 ao 31 aparecerão aqui -->
+                </div>
+                
+                <div class="acoes-rodape" style="margin-top: 20px;">
+                    <button id="btnExportar" class="btn-exportar">📥 Exportar para Excel</button>
+                    <button id="btnLimpar" class="btn-limpar">🗑️ Limpar Toda a Agenda</button>
+                </div>
+            </section>
+        </div>
+
     </main>
+
+    <!-- MENU INFERIOR (TABS) -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="trocarAba('abaInicio', this)">
+            <span class="icon">🏠</span>
+            <span class="text">Início</span>
+        </button>
+        <button class="nav-btn" onclick="trocarAba('abaAgenda', this)">
+            <span class="icon">📅</span>
+            <span class="text">Agenda</span>
+        </button>
+    </nav>
 
     <script src="app.js"></script>
 </body>
