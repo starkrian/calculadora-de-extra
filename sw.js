@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agenda-he-vd-v10';
+const CACHE_NAME = 'agenda-he-vd-v11';
 const assets = [
   './',
   './index.html',
