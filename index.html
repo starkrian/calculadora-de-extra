@@ -15,7 +15,6 @@
     </header>
 
     <main class="container">
-        
         <!-- FILTRO MENSAL -->
         <section class="filtro-mes">
             <label for="mesFiltro">Mês de Referência:</label>
@@ -39,24 +38,37 @@
                     </div>
                 </div>
                 
-                <!-- CAIXA DO TOTAL SOMADO EM DINHEIRO -->
                 <div class="card card-total">
                     <h3>💰 Total Geral no Mês (Líquido)</h3>
                     <p id="totalGeral">R$ 0,00</p>
                     <small>Bruto Total: <span id="brutoGeral">R$ 0,00</span></small>
                 </div>
 
-                <!-- NOVO: CAIXA DE TOTAL DE HORAS -->
-                <div class="card card-horas">
-                    <h3>⏱️ Total de Horas no Mês</h3>
-                    <div class="linha-horas">
-                        <div>
-                            <small>Horas HE</small><br>
-                            <strong id="totalHorasHE">0.0h</strong>
+                <!-- NOVO: META MENSAL -->
+                <div class="card card-meta">
+                    <h3>🎯 Meta: R$ <span id="textoMetaV">0,00</span></h3>
+                    <div class="progress-bg">
+                        <div class="progress-fill" id="barraMeta"></div>
+                    </div>
+                    <small id="textoFaltaMeta">Calculando...</small>
+                </div>
+
+                <div class="linha-cards">
+                    <div class="card card-horas">
+                        <h3>⏱️ Total de Horas</h3>
+                        <div class="linha-horas">
+                            <div><small>HE</small><br><strong id="totalHorasHE">0.0h</strong></div>
+                            <div><small>VD</small><br><strong id="totalHorasVD">0.0h</strong></div>
                         </div>
-                        <div>
-                            <small>Horas VD</small><br>
-                            <strong id="totalHorasVD">0.0h</strong>
+                    </div>
+                    <!-- NOVO: GRÁFICO SEMANAL -->
+                    <div class="card card-grafico">
+                        <h3>📊 Ganhos (Semanas)</h3>
+                        <div class="grafico-barras">
+                            <div class="col-barra"><div class="barra" id="barS1" title="Semana 1"></div><span>S1</span></div>
+                            <div class="col-barra"><div class="barra" id="barS2" title="Semana 2"></div><span>S2</span></div>
+                            <div class="col-barra"><div class="barra" id="barS3" title="Semana 3"></div><span>S3</span></div>
+                            <div class="col-barra"><div class="barra" id="barS4" title="Semana 4"></div><span>S4</span></div>
                         </div>
                     </div>
                 </div>
@@ -66,12 +78,10 @@
                 <h2 id="tituloFormulario">Adicionar Serviço</h2>
                 <form id="serviceForm">
                     <input type="hidden" id="editIndex" value="-1">
-
                     <div class="input-group">
                         <label for="nomeServico">Nome/Local do Serviço:</label>
                         <input type="text" id="nomeServico" placeholder="Ex: Cooper, Bike, Evento..." required>
                     </div>
-
                     <div class="input-group">
                         <label for="tipo">Tipo de Serviço:</label>
                         <select id="tipo" required>
@@ -79,23 +89,14 @@
                             <option value="VD">Vencimento Diário (VD)</option>
                         </select>
                     </div>
-                    
                     <div class="input-group">
                         <label for="data">Data do Serviço:</label>
                         <input type="date" id="data" required>
                     </div>
-                    
                     <div class="linha-tempo">
-                        <div class="input-group">
-                            <label for="inicio">Início:</label>
-                            <input type="time" id="inicio" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="termino">Término:</label>
-                            <input type="time" id="termino" required>
-                        </div>
+                        <div class="input-group"><label for="inicio">Início:</label><input type="time" id="inicio" required></div>
+                        <div class="input-group"><label for="termino">Término:</label><input type="time" id="termino" required></div>
                     </div>
-
                     <button type="submit" id="btnSalvar" class="btn-salvar">Salvar na Agenda</button>
                     <button type="button" id="btnCancelarEdicao" class="btn-cancelar hidden">Cancelar Edição</button>
                 </form>
@@ -105,20 +106,13 @@
                 <h2>Serviços Adicionados no Mês</h2>
                 <div id="listaServicos"></div>
             </section>
-
         </div>
 
         <!-- ================= ABA 2: AGENDA (GRADE) ================= -->
         <div id="abaAgenda" class="tab-content">
             <section class="calendario-visual">
-                <div class="dias-semana">
-                    <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
-                </div>
-                
-                <div id="gridCalendario" class="grid-calendario">
-                    <!-- Os quadrados dos dias aparecerão aqui -->
-                </div>
-                
+                <div class="dias-semana"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+                <div id="gridCalendario" class="grid-calendario"></div>
                 <div class="acoes-rodape" style="margin-top: 30px;">
                     <button id="btnExportar" class="btn-exportar">📥 Exportar para Excel</button>
                     <button id="btnLimpar" class="btn-limpar">🗑️ Limpar Toda a Agenda</button>
@@ -126,18 +120,53 @@
             </section>
         </div>
 
+        <!-- ================= ABA 3: CONFIGURAÇÕES ================= -->
+        <div id="abaConfig" class="tab-content">
+            <section class="formulario">
+                <h2>⚙️ Configurações de Valores</h2>
+                <p class="texto-pequeno" style="margin-bottom: 15px;">Atualize sua meta e o valor da sua hora.</p>
+                <form id="configForm">
+                    <div class="input-group">
+                        <label>🎯 Sua Meta Mensal (R$):</label>
+                        <input type="number" id="cfgMeta" step="0.01" required>
+                    </div>
+
+                    <h3 style="margin: 20px 0 10px; font-size: 15px;">Valores Hora Extra (HE)</h3>
+                    <div class="linha-tempo">
+                        <div class="input-group"><label>Diurno (Bruto)</label><input type="number" id="cfgHeD_B" step="0.01" required></div>
+                        <div class="input-group"><label>Diurno (Líq)</label><input type="number" id="cfgHeD_L" step="0.01" required></div>
+                    </div>
+                    <div class="linha-tempo">
+                        <div class="input-group"><label>Noturno (Bruto)</label><input type="number" id="cfgHeN_B" step="0.01" required></div>
+                        <div class="input-group"><label>Noturno (Líq)</label><input type="number" id="cfgHeN_L" step="0.01" required></div>
+                    </div>
+
+                    <h3 style="margin: 20px 0 10px; font-size: 15px;">Valores Vencimento Diário (VD)</h3>
+                    <div class="linha-tempo">
+                        <div class="input-group"><label>Diurno (Bruto)</label><input type="number" id="cfgVdD_B" step="0.01" required></div>
+                        <div class="input-group"><label>Diurno (Líq)</label><input type="number" id="cfgVdD_L" step="0.01" required></div>
+                    </div>
+                    <div class="linha-tempo">
+                        <div class="input-group"><label>Noturno (Bruto)</label><input type="number" id="cfgVdN_B" step="0.01" required></div>
+                        <div class="input-group"><label>Noturno (Líq)</label><input type="number" id="cfgVdN_L" step="0.01" required></div>
+                    </div>
+
+                    <button type="submit" class="btn-salvar">Salvar Configurações</button>
+                    <button type="button" class="btn-cancelar" onclick="restaurarPadroes()">Restaurar Valores Padrão</button>
+                </form>
+            </section>
+        </div>
+
     </main>
 
-    <!-- MENU INFERIOR (TABS) -->
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast"></div>
+
+    <!-- MENU INFERIOR -->
     <nav class="bottom-nav">
-        <button class="nav-btn active" onclick="trocarAba('abaInicio', this)">
-            <span class="icon">🏠</span>
-            <span class="text">Início</span>
-        </button>
-        <button class="nav-btn" onclick="trocarAba('abaAgenda', this)">
-            <span class="icon">📅</span>
-            <span class="text">Agenda</span>
-        </button>
+        <button class="nav-btn active" onclick="trocarAba('abaInicio', this)"><span class="icon">🏠</span><span class="text">Início</span></button>
+        <button class="nav-btn" onclick="trocarAba('abaAgenda', this)"><span class="icon">📅</span><span class="text">Agenda</span></button>
+        <button class="nav-btn" onclick="trocarAba('abaConfig', this)"><span class="icon">⚙️</span><span class="text">Ajustes</span></button>
     </nav>
 
     <script src="app.js"></script>
