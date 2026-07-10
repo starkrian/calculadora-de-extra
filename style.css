@@ -3,9 +3,9 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 body { background-color: var(--bg-body); color: var(--text-main); padding-bottom: 80px; transition: background-color 0.3s, color 0.3s; }
-header { background-color: var(--header-bg); color: white; padding: 20px; text-align: center; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-.btn-tema { position: absolute; top: 20px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+header { background-color: var(--header-bg); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
 .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+
 .filtro-mes, section { background: var(--bg-card); padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
 .filtro-mes { display: flex; align-items: center; justify-content: space-between; padding: 15px; }
 
@@ -24,7 +24,7 @@ header { background-color: var(--header-bg); color: white; padding: 20px; text-a
 .card-total p { font-size: 26px; } 
 .card small { font-size: 12px; opacity: 0.9; }
 
-/* NOVO: META E GRÁFICO */
+/* META E GRÁFICO */
 .card-meta { background-color: #f59e0b; width: 100%; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
 .progress-bg { background: rgba(0,0,0,0.2); height: 12px; border-radius: 6px; margin: 10px 0; overflow: hidden; width: 100%; }
 .progress-fill { background: #ffffff; height: 100%; width: 0%; transition: width 0.8s ease-out; }
@@ -48,16 +48,19 @@ h2 { font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid var(--border
 .nav-btn.active { color: var(--nav-active); font-weight: bold; }
 .nav-btn .icon { font-size: 20px; margin-bottom: 3px; }
 
-/* FORMULÁRIOS */
+/* FORMULÁRIOS E BOTÕES */
 .input-group { margin-bottom: 15px; width: 100%; }
 .linha-tempo { display: flex; gap: 10px; }
 label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: 600; color: var(--text-main); }
 input, select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 16px; background-color: var(--input-bg); color: var(--text-main); color-scheme: light dark; }
 button { width: 100%; padding: 12px; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; }
+
 .btn-salvar { background-color: #2563eb; }
 .btn-cancelar { background-color: #64748b; margin-top: 10px; }
 .btn-exportar { background-color: #059669; margin-bottom: 10px; }
 .btn-limpar { background-color: #ef4444; }
+.btn-tema { background-color: #475569; } /* Agora o botão de tema é um botão normal largo */
+
 .hidden { display: none !important; }
 
 /* LISTA INÍCIO */
@@ -84,7 +87,7 @@ button { width: 100%; padding: 12px; border: none; border-radius: 5px; font-size
 .bg-he { background-color: #d8b4fe; }
 .bg-vd { background-color: #bae6fd; }
 
-/* NOVO: TOAST NOTIFICATION */
+/* TOAST NOTIFICATION */
 .toast {
     position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
     background: #334155; color: white; padding: 12px 20px; border-radius: 30px;

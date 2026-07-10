@@ -1,12 +1,14 @@
-// --- VALORES PADRÃO (Caso seja o primeiro acesso) ---
+// --- VALORES PADRÃO ---
 const PADROES = {
     meta: 1500.00,
     HE: { diurno: { bruto: 33.35, liquido: 24.18 }, noturno: { bruto: 50.03, liquido: 36.27 } },
     VD: { diurno: { bruto: 26.72, liquido: 26.72 }, noturno: { bruto: 32.29, liquido: 32.29 } }
 };
 
-// Carrega os valores customizados ou usa os padrões
-let VALORES = JSON.parse(localStorage.getItem('configValores')) || PADROES;
+let VALORES = localStorage.getItem('configValores') 
+    ? JSON.parse(localStorage.getItem('configValores')) 
+    : JSON.parse(JSON.stringify(PADROES));
+
 let META = parseFloat(localStorage.getItem('configMeta')) || PADROES.meta;
 let agenda = JSON.parse(localStorage.getItem('agendaServicos')) || [];
 
@@ -33,11 +35,11 @@ const metaThemeColor = document.getElementById('theme-color-meta');
 function aplicarTema(tema) {
     if (tema === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
-        btnTema.textContent = '☀️ Tema Claro';
+        btnTema.textContent = '☀️ Voltar para Tema Claro';
         metaThemeColor.setAttribute('content', '#0b1120');
     } else {
         document.documentElement.removeAttribute('data-theme');
-        btnTema.textContent = '🌙 Tema Escuro';
+        btnTema.textContent = '🌙 Ativar Tema Escuro';
         metaThemeColor.setAttribute('content', '#1e40af');
     }
 }
@@ -129,7 +131,7 @@ function atualizarTela() {
     
     let brutoRealizado = 0, liquidoRealizado = 0, brutoPrevisto = 0, liquidoPrevisto = 0;
     let horasTotalHE = 0, horasTotalVD = 0;
-    let ganhoSemanas = [0, 0, 0, 0]; // S1, S2, S3, S4
+    let ganhoSemanas = [0, 0, 0, 0];
 
     let hoje = new Date(); hoje.setHours(0,0,0,0);
 
@@ -148,7 +150,6 @@ function atualizarTela() {
         if (item.tipo === 'HE') horasTotalHE += horasDoServico;
         else if (item.tipo === 'VD') horasTotalVD += horasDoServico;
 
-        // Distribui para o Gráfico
         if (dia <= 7) ganhoSemanas[0] += liq;
         else if (dia <= 14) ganhoSemanas[1] += liq;
         else if (dia <= 21) ganhoSemanas[2] += liq;
@@ -173,7 +174,6 @@ function atualizarTela() {
 
     if (agendaFiltrada.length === 0) lista.innerHTML = '<p style="text-align:center;" class="texto-pequeno">Nenhum serviço adicionado.</p>';
 
-    // Atualiza Textos Financeiros
     document.getElementById('totalRealizado').textContent = formatarDinheiro(liquidoRealizado);
     document.getElementById('brutoRealizado').textContent = formatarDinheiro(brutoRealizado);
     document.getElementById('totalPrevisto').textContent = formatarDinheiro(liquidoPrevisto);
@@ -185,7 +185,7 @@ function atualizarTela() {
     document.getElementById('totalHorasHE').textContent = horasTotalHE.toFixed(1) + 'h';
     document.getElementById('totalHorasVD').textContent = horasTotalVD.toFixed(1) + 'h';
 
-    // ATUALIZA A META
+    // META
     document.getElementById('textoMetaV').textContent = META.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
     let pctMeta = (totalGeralLiquido / META) * 100;
     if (pctMeta > 100) pctMeta = 100;
@@ -195,8 +195,8 @@ function atualizarTela() {
     if (falta > 0) document.getElementById('textoFaltaMeta').textContent = `Faltam ${formatarDinheiro(falta)} para bater a meta.`;
     else document.getElementById('textoFaltaMeta').textContent = `🎉 Parabéns! Meta alcançada!`;
 
-    // ATUALIZA GRÁFICO
-    const maxSemana = Math.max(...ganhoSemanas, 1); // Evita divisão por zero
+    // GRÁFICO
+    const maxSemana = Math.max(...ganhoSemanas, 1);
     for(let i=0; i<4; i++){
         let altura = (ganhoSemanas[i] / maxSemana) * 100;
         document.getElementById(`barS${i+1}`).style.height = altura + '%';
@@ -239,7 +239,6 @@ document.getElementById('serviceForm').addEventListener('submit', function(e) {
     const termino = document.getElementById('termino').value;
     const editIndex = parseInt(document.getElementById('editIndex').value);
 
-    // Recalcula tudo retroativamente se os valores de Configurações mudaram
     const calculo = calcularServico(tipo, inicio, termino);
     const novoServico = { nomeServico, tipo, data, inicio, termino, calculo };
     
@@ -275,6 +274,7 @@ document.getElementById('btnLimpar').addEventListener('click', function() {
     }
 });
 
+// --- EXPORTAR E IMPORTAR EXCEL ---
 document.getElementById('btnExportar').addEventListener('click', function() {
     if (agenda.length === 0) return showToast("A agenda está vazia", 'erro');
     const agendaExportar = [...agenda].sort((a, b) => new Date(a.data) - new Date(b.data));
@@ -291,6 +291,50 @@ document.getElementById('btnExportar').addEventListener('click', function() {
     const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Relatorio_HE_VD.csv"; link.click();
     showToast('📥 Excel exportado!');
+});
+
+document.getElementById('fileImport').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const text = event.target.result;
+        const linhas = text.split('\n');
+        let importados = 0;
+        
+        for(let i = 1; i < linhas.length; i++) { 
+            if(!linhas[i].trim()) continue;
+            const colunas = linhas[i].split(';');
+            if(colunas.length >= 5) {
+                const nome = colunas[0];
+                const tipo = colunas[1];
+                const dataBr = colunas[2]; 
+                const inicio = colunas[3];
+                const termino = colunas[4].trim();
+                
+                const partesData = dataBr.split('/');
+                if(partesData.length === 3) {
+                    const dataUs = `${partesData[2]}-${partesData[1]}-${partesData[0]}`;
+                    const calculo = calcularServico(tipo, inicio, termino);
+                    
+                    agenda.push({
+                        nomeServico: nome === "Sem nome" ? "" : nome,
+                        tipo: tipo, data: dataUs, inicio: inicio, termino: termino, calculo: calculo
+                    });
+                    importados++;
+                }
+            }
+        }
+        if(importados > 0) {
+            localStorage.setItem('agendaServicos', JSON.stringify(agenda));
+            atualizarTela();
+            showToast(`✅ ${importados} serviços importados!`);
+        } else {
+            showToast(`⚠️ Nenhum dado válido encontrado.`, 'erro');
+        }
+    };
+    reader.readAsText(file);
+    this.value = ''; 
 });
 
 // --- CONFIGURAÇÕES ---
@@ -324,11 +368,7 @@ document.getElementById('configForm').addEventListener('submit', function(e) {
     localStorage.setItem('configMeta', META);
     localStorage.setItem('configValores', JSON.stringify(VALORES));
     
-    // Recalcula o histórico antigo usando a nova tabela de valores
-    agenda = agenda.map(item => {
-        item.calculo = calcularServico(item.tipo, item.inicio, item.termino);
-        return item;
-    });
+    agenda = agenda.map(item => { item.calculo = calcularServico(item.tipo, item.inicio, item.termino); return item; });
     localStorage.setItem('agendaServicos', JSON.stringify(agenda));
     
     showToast('⚙️ Configurações Salvas!');
@@ -337,13 +377,12 @@ document.getElementById('configForm').addEventListener('submit', function(e) {
 
 window.restaurarPadroes = function() {
     if(confirm("Voltar todos os valores da sua hora para os de fábrica?")) {
-        VALORES = JSON.parse(JSON.stringify(PADROES)); // Clona padrão
+        VALORES = JSON.parse(JSON.stringify(PADROES)); 
         META = PADROES.meta;
         localStorage.setItem('configMeta', META);
         localStorage.setItem('configValores', JSON.stringify(VALORES));
         carregarConfiguracoesParaFormulario();
         
-        // Recalcula o histórico com valores de fábrica
         agenda = agenda.map(item => { item.calculo = calcularServico(item.tipo, item.inicio, item.termino); return item; });
         localStorage.setItem('agendaServicos', JSON.stringify(agenda));
         

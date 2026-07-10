@@ -11,17 +11,14 @@
 <body>
     <header>
         <h1>Controle de HE / VD</h1>
-        <button id="btnTema" class="btn-tema">🌙 Tema Escuro</button>
     </header>
 
     <main class="container">
-        <!-- FILTRO MENSAL -->
         <section class="filtro-mes">
             <label for="mesFiltro">Mês de Referência:</label>
             <input type="month" id="mesFiltro">
         </section>
 
-        <!-- ================= ABA 1: INÍCIO ================= -->
         <div id="abaInicio" class="tab-content active">
             
             <section class="dashboard">
@@ -44,7 +41,6 @@
                     <small>Bruto Total: <span id="brutoGeral">R$ 0,00</span></small>
                 </div>
 
-                <!-- NOVO: META MENSAL -->
                 <div class="card card-meta">
                     <h3>🎯 Meta: R$ <span id="textoMetaV">0,00</span></h3>
                     <div class="progress-bg">
@@ -61,7 +57,6 @@
                             <div><small>VD</small><br><strong id="totalHorasVD">0.0h</strong></div>
                         </div>
                     </div>
-                    <!-- NOVO: GRÁFICO SEMANAL -->
                     <div class="card card-grafico">
                         <h3>📊 Ganhos (Semanas)</h3>
                         <div class="grafico-barras">
@@ -108,7 +103,6 @@
             </section>
         </div>
 
-        <!-- ================= ABA 2: AGENDA (GRADE) ================= -->
         <div id="abaAgenda" class="tab-content">
             <section class="calendario-visual">
                 <div class="dias-semana"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
@@ -120,11 +114,24 @@
             </section>
         </div>
 
-        <!-- ================= ABA 3: CONFIGURAÇÕES ================= -->
         <div id="abaConfig" class="tab-content">
             <section class="formulario">
+                
+                <div style="background: var(--bg-body); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color); text-align: center;">
+                    <h3 style="font-size: 15px; margin-bottom: 10px;">🎨 Aparência</h3>
+                    <button id="btnTema" class="btn-tema">🌙 Ativar Tema Escuro</button>
+                </div>
+
+                <div style="background: var(--bg-body); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+                    <h3 style="font-size: 15px; margin-bottom: 10px;">💾 Recuperação de Dados</h3>
+                    <p class="texto-pequeno" style="margin-bottom: 10px;">Se você perdeu sua agenda, importe a planilha (.csv) que você havia exportado para recuperar tudo.</p>
+                    <input type="file" id="fileImport" accept=".csv" class="hidden">
+                    <button type="button" class="btn-salvar" style="background-color: #8b5cf6;" onclick="document.getElementById('fileImport').click()">📂 Importar Planilha de Backup</button>
+                </div>
+
                 <h2>⚙️ Configurações de Valores</h2>
                 <p class="texto-pequeno" style="margin-bottom: 15px;">Atualize sua meta e o valor da sua hora.</p>
+                
                 <form id="configForm">
                     <div class="input-group">
                         <label>🎯 Sua Meta Mensal (R$):</label>
@@ -159,10 +166,8 @@
 
     </main>
 
-    <!-- TOAST NOTIFICATION -->
     <div id="toast" class="toast"></div>
 
-    <!-- MENU INFERIOR -->
     <nav class="bottom-nav">
         <button class="nav-btn active" onclick="trocarAba('abaInicio', this)"><span class="icon">🏠</span><span class="text">Início</span></button>
         <button class="nav-btn" onclick="trocarAba('abaAgenda', this)"><span class="icon">📅</span><span class="text">Agenda</span></button>
