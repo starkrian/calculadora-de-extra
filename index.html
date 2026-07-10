@@ -9,6 +9,28 @@
     <meta name="theme-color" content="#1e40af" id="theme-color-meta">
 </head>
 <body>
+    
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <h2>☁️ Agenda na Nuvem</h2>
+            <p style="font-size: 14px; margin-bottom: 20px; color: var(--text-muted);">Faça login para sincronizar seus dados.</p>
+            
+            <div class="input-group">
+                <label>E-mail:</label>
+                <input type="email" id="emailLogin" placeholder="seu@email.com">
+            </div>
+            <div class="input-group">
+                <label>Senha:</label>
+                <input type="password" id="senhaLogin" placeholder="******">
+            </div>
+            
+            <button class="btn-salvar" onclick="entrar()" style="margin-bottom: 10px;">Entrar</button>
+            <button class="btn-cancelar" onclick="criarConta()">Criar Nova Conta</button>
+            
+            <p id="msgLogin" style="margin-top: 15px; font-size: 13px; color: #ef4444; font-weight: bold;"></p>
+        </div>
+    </div>
+
     <header>
         <h1>Controle de HE / VD</h1>
     </header>
@@ -20,7 +42,6 @@
         </section>
 
         <div id="abaInicio" class="tab-content active">
-            
             <section class="dashboard">
                 <div class="linha-cards">
                     <div class="card card-realizado">
@@ -73,21 +94,9 @@
                 <h2 id="tituloFormulario">Adicionar Serviço</h2>
                 <form id="serviceForm">
                     <input type="hidden" id="editIndex" value="-1">
-                    <div class="input-group">
-                        <label for="nomeServico">Nome/Local do Serviço:</label>
-                        <input type="text" id="nomeServico" placeholder="Ex: Cooper, Bike, Evento..." required>
-                    </div>
-                    <div class="input-group">
-                        <label for="tipo">Tipo de Serviço:</label>
-                        <select id="tipo" required>
-                            <option value="HE">Hora Extra (HE)</option>
-                            <option value="VD">Vencimento Diário (VD)</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label for="data">Data do Serviço:</label>
-                        <input type="date" id="data" required>
-                    </div>
+                    <div class="input-group"><label for="nomeServico">Nome/Local:</label><input type="text" id="nomeServico" required></div>
+                    <div class="input-group"><label for="tipo">Tipo:</label><select id="tipo" required><option value="HE">Hora Extra (HE)</option><option value="VD">Vencimento Diário (VD)</option></select></div>
+                    <div class="input-group"><label for="data">Data:</label><input type="date" id="data" required></div>
                     <div class="linha-tempo">
                         <div class="input-group"><label for="inicio">Início:</label><input type="time" id="inicio" required></div>
                         <div class="input-group"><label for="termino">Término:</label><input type="time" id="termino" required></div>
@@ -118,27 +127,22 @@
             <section class="formulario">
                 
                 <div style="background: var(--bg-body); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color); text-align: center;">
-                    <h3 style="font-size: 15px; margin-bottom: 10px;">🎨 Aparência</h3>
+                    <h3 style="font-size: 15px; margin-bottom: 10px;">Conta e Aparência</h3>
+                    <p style="font-size: 13px; margin-bottom: 10px; color: var(--text-muted);" id="userLogado">Logado como: ...</p>
+                    <button onclick="sairConta()" class="btn-limpar" style="margin-bottom: 10px;">Sair da Conta</button>
                     <button id="btnTema" class="btn-tema">🌙 Ativar Tema Escuro</button>
                 </div>
 
                 <div style="background: var(--bg-body); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color);">
-                    <h3 style="font-size: 15px; margin-bottom: 10px;">💾 Recuperação de Dados</h3>
-                    <p class="texto-pequeno" style="margin-bottom: 10px;">Se você perdeu sua agenda, importe a planilha (.csv) que você havia exportado para recuperar tudo.</p>
+                    <h3 style="font-size: 15px; margin-bottom: 10px;">💾 Importar de um Backup Antigo</h3>
                     <input type="file" id="fileImport" accept=".csv" class="hidden">
-                    <button type="button" class="btn-salvar" style="background-color: #8b5cf6;" onclick="document.getElementById('fileImport').click()">📂 Importar Planilha de Backup</button>
+                    <button type="button" class="btn-salvar" style="background-color: #8b5cf6;" onclick="document.getElementById('fileImport').click()">📂 Importar Planilha</button>
                 </div>
 
                 <h2>⚙️ Configurações de Valores</h2>
-                <p class="texto-pequeno" style="margin-bottom: 15px;">Atualize sua meta e o valor da sua hora.</p>
-                
                 <form id="configForm">
-                    <div class="input-group">
-                        <label>🎯 Sua Meta Mensal (R$):</label>
-                        <input type="number" id="cfgMeta" step="0.01" required>
-                    </div>
-
-                    <h3 style="margin: 20px 0 10px; font-size: 15px;">Valores Hora Extra (HE)</h3>
+                    <div class="input-group"><label>🎯 Sua Meta Mensal (R$):</label><input type="number" id="cfgMeta" step="0.01" required></div>
+                    <h3 style="margin: 20px 0 10px; font-size: 15px;">Hora Extra (HE)</h3>
                     <div class="linha-tempo">
                         <div class="input-group"><label>Diurno (Bruto)</label><input type="number" id="cfgHeD_B" step="0.01" required></div>
                         <div class="input-group"><label>Diurno (Líq)</label><input type="number" id="cfgHeD_L" step="0.01" required></div>
@@ -147,8 +151,7 @@
                         <div class="input-group"><label>Noturno (Bruto)</label><input type="number" id="cfgHeN_B" step="0.01" required></div>
                         <div class="input-group"><label>Noturno (Líq)</label><input type="number" id="cfgHeN_L" step="0.01" required></div>
                     </div>
-
-                    <h3 style="margin: 20px 0 10px; font-size: 15px;">Valores Vencimento Diário (VD)</h3>
+                    <h3 style="margin: 20px 0 10px; font-size: 15px;">Vencimento Diário (VD)</h3>
                     <div class="linha-tempo">
                         <div class="input-group"><label>Diurno (Bruto)</label><input type="number" id="cfgVdD_B" step="0.01" required></div>
                         <div class="input-group"><label>Diurno (Líq)</label><input type="number" id="cfgVdD_L" step="0.01" required></div>
@@ -157,13 +160,11 @@
                         <div class="input-group"><label>Noturno (Bruto)</label><input type="number" id="cfgVdN_B" step="0.01" required></div>
                         <div class="input-group"><label>Noturno (Líq)</label><input type="number" id="cfgVdN_L" step="0.01" required></div>
                     </div>
-
                     <button type="submit" class="btn-salvar">Salvar Configurações</button>
-                    <button type="button" class="btn-cancelar" onclick="restaurarPadroes()">Restaurar Valores Padrão</button>
+                    <button type="button" class="btn-cancelar" onclick="restaurarPadroes()">Restaurar Padrões</button>
                 </form>
             </section>
         </div>
-
     </main>
 
     <div id="toast" class="toast"></div>
@@ -173,6 +174,10 @@
         <button class="nav-btn" onclick="trocarAba('abaAgenda', this)"><span class="icon">📅</span><span class="text">Agenda</span></button>
         <button class="nav-btn" onclick="trocarAba('abaConfig', this)"><span class="icon">⚙️</span><span class="text">Ajustes</span></button>
     </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
     <script src="app.js"></script>
 </body>
