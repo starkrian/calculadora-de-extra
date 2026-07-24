@@ -2,12 +2,12 @@
 // 1. CONFIGURAÇÃO DO FIREBASE (NUVEM)
 // ==========================================
 const firebaseConfig = {
-  apiKey: "AIzaSyDWJ2-ACUjQPIwi4jNrPFbHkyboWLA4RBE",
-  authDomain: "calculadora-hevd.firebaseapp.com",
-  projectId: "calculadora-hevd",
-  storageBucket: "calculadora-hevd.firebasestorage.app",
-  messagingSenderId: "489952953922",
-  appId: "1:489952953922:web:8ed72a251fe875556d4fdb"
+    apiKey: "AIzaSyDWJ2-ACUjQPIwi4jNrPFbHkyboWLA4RBE",
+    authDomain: "calculadora-hevd.firebaseapp.com",
+    projectId: "calculadora-hevd",
+    storageBucket: "calculadora-hevd.firebasestorage.app",
+    messagingSenderId: "489952953922",
+    appId: "1:489952953922:web:8ed72a251fe875556d4fdb"
 };
 
 // Inicializa o Firebase
@@ -229,7 +229,6 @@ function atualizarTela() {
     
     let brutoRealizado = 0, liquidoRealizado = 0, brutoPrevisto = 0, liquidoPrevisto = 0;
     let horasTotalHE = 0, horasTotalVD = 0;
-    let ganhoSemanas = [0, 0, 0, 0];
 
     let hoje = new Date(); hoje.setHours(0,0,0,0);
 
@@ -238,7 +237,6 @@ function atualizarTela() {
 
     agendaFiltrada.forEach(item => {
         let dataItem = new Date(item.data + "T00:00:00");
-        let dia = dataItem.getDate();
         let liq = item.calculo.totalLiquido;
 
         if (dataItem <= hoje) { brutoRealizado += item.calculo.totalBruto; liquidoRealizado += liq; } 
@@ -247,11 +245,6 @@ function atualizarTela() {
         const horasDoServico = item.calculo.horasDiurnas + item.calculo.horasNoturnas;
         if (item.tipo === 'HE') horasTotalHE += horasDoServico;
         else if (item.tipo === 'VD') horasTotalVD += horasDoServico;
-
-        if (dia <= 7) ganhoSemanas[0] += liq;
-        else if (dia <= 14) ganhoSemanas[1] += liq;
-        else if (dia <= 21) ganhoSemanas[2] += liq;
-        else ganhoSemanas[3] += liq;
 
         const indexReal = agenda.indexOf(item);
         const nomeExibicao = item.nomeServico || "Serviço sem nome";
@@ -291,14 +284,6 @@ function atualizarTela() {
     const falta = META - totalGeralLiquido;
     if (falta > 0) document.getElementById('textoFaltaMeta').textContent = `Faltam ${formatarDinheiro(falta)} para bater a meta.`;
     else document.getElementById('textoFaltaMeta').textContent = `🎉 Parabéns! Meta alcançada!`;
-
-    // GRÁFICO
-    const maxSemana = Math.max(...ganhoSemanas, 1);
-    for(let i=0; i<4; i++){
-        let altura = (ganhoSemanas[i] / maxSemana) * 100;
-        document.getElementById(`barS${i+1}`).style.height = altura + '%';
-        document.getElementById(`barS${i+1}`).title = `Semana ${i+1}: ${formatarDinheiro(ganhoSemanas[i])}`;
-    }
 }
 document.getElementById('mesFiltro').addEventListener('change', atualizarTela);
 
